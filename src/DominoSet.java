@@ -33,7 +33,8 @@ public class DominoSet {
     }
 
     // метод для превращения набора в последовательность (набор не меняется, возвращает последовательность)
-    public Sequence_loh toSequence(){
-        return new Sequence_loh(this);
-    }
+    // сейчас не нужен, наверно можно удалить
+    /*public Sequence toSequence(){
+        return new Sequence(this);
+    }*/
 }
