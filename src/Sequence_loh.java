@@ -1,35 +1,34 @@
 import java.util.Random;
 
-public class Sequence2 {
-    private Node first;
-    private Node last;
-    private DominoSet set;
-    private int length;
+public class Sequence_loh {
+    private int last;  // индекс (в наборе) последней кости
+    private int first;  // индекс (в наборе) первой кости последовательности
+    private final DominoSet set;  // ссылка на набор домино
+    private int[] nextPieces;  // массив, в котором для каждой фишки хранятся ссылки (индексы массива) на следующую кость
+    private int length;  // текущая длина последовательности
 
-    public Sequence2(DominoSet set){
+    public Sequence_loh(DominoSet set){
         this.set = set;
-        length = set.getSize();
+        nextPieces = new int[set.getSize()];
+        length = nextPieces.length;
 
         boolean[] tempArr = new boolean[length];  // массив нужный, чтобы узнать занесли ли уже кость с индексом в последовательность
 
+        int indexForNextPiece = 0;  // место, куда вставляем следующую кость
         int piecesLeft = length - 1;
         Random rand = new Random();
 
-        int curIndex = rand.nextInt(length);
-        first = new Node(set.getPiece(curIndex));
-        Node prev = first;
-        Node next = null;
-        tempArr[curIndex] = true;
+        first = rand.nextInt(length);
+        tempArr[first] = true;
+        indexForNextPiece = first;
 
         // генерация случайной последовательности костей без повторений
         while (true){
-            curIndex = rand.nextInt(length);
-            if (!tempArr[curIndex]){
-                tempArr[curIndex] = true;
-                next = new Node(set.getPiece(curIndex));
-                prev.setLink(next);
-
-                prev = next;
+            int randIndex = rand.nextInt(length);
+            if (!tempArr[randIndex]){
+                tempArr[randIndex] = true;
+                nextPieces[indexForNextPiece] = randIndex;
+                indexForNextPiece = randIndex;
                 piecesLeft--;
             }
             if (piecesLeft == 0) {
@@ -37,48 +36,68 @@ public class Sequence2 {
             }
         }
 
-        last = next;  // последняя добавленная кость
-        last.setLink(first);
+//        System.out.println(indexForNextPiece);
+        last = indexForNextPiece;  // последняя добавленная кость
+        nextPieces[last] = first;
+        length = nextPieces.length;
     }
 
-    public void print(){
+    // метод для печати всей последовательности
+    public void print() {
         if(length > 0) {
             System.out.println("Последовательность костей домино: ");
-            Node prev = first;
-            Node next = first.getLink();
+            int prev = first;
+            int next = nextPieces[first];
             int i = 1;
 
             do {
-                String pieceValue = prev.getValue().getValue();
-                String nextPieceValue = next.getValue().getValue();
+                String pieceValue = set.getPiece(prev).getValue();
+                String nextPieceValue = set.getPiece(next).getValue();
 
 //            System.out.printf("Фишка с номером %d в последовательности - %s (%d), следующая для нее - %s (%d)\n", i, pieceValue, prev, nextPieceValue, next);
                 System.out.printf("Фишка под номером %d в последовательности - %s, следующая для ней - %s\n", i, pieceValue, nextPieceValue);
 
                 prev = next;
-                next = next.getLink();
+                next = nextPieces[prev];
                 i++;
             } while (prev != first);
         } else{
             System.out.println("Последовательность костей домино пуста");
         }
+
+        /*System.out.println();
+
+        prev = first;
+
+        for(int j = 0; j < 28; j++){
+            int nxt = nextPieces[prev];
+
+            String pieceValue = set.getPiece(prev).getValue();
+            String nextPieceValue = set.getPiece(nxt).getValue();
+
+            System.out.printf("Фишка с номером %d в последовательности - %s (%d), следующая для нее - %s (%d)\n", j + 1, pieceValue, prev, nextPieceValue, nxt);
+            prev = nxt;
+        }
+        System.out.println(first + " " + last);
+        System.out.println(prev + " " + nextPieces[prev]);*/
     }
 
+    // получить кость под номером n (нумерация с 1), если n больше длины последовательности -> null
     public DominoPiece getPiece(int n){
         if (n < 1) {
             System.out.println("Номер должен быть положительным");
             return null;
         }
-        Node prev = first;
-        Node next = first.getLink();
+        int prev = first;
+        int next = nextPieces[first];
         int i = 1;
 
         do{
             if (i == n){
-                return prev.getValue();
+                return set.getPiece(prev);
             }
             prev = next;
-            next = next.getLink();
+            next = nextPieces[prev];
             i++;
 
         } while(prev != first);
@@ -93,16 +112,16 @@ public class Sequence2 {
             System.out.println("Номер должен быть положительным");
             return null;
         }
-        Node prev = first;
-        Node next = first.getLink();
+        int prev = first;
+        int next = nextPieces[first];
         int i = 1;
 
         while (true){
             if (i == n){
-                return prev.getValue();
+                return set.getPiece(prev);
             }
             prev = next;
-            next = next.getLink();
+            next = nextPieces[prev];
             i++;
 
         }
@@ -115,21 +134,21 @@ public class Sequence2 {
             return null;
         }
 
-        Node prev = last;
-        Node next = first;
+        int prev = last;
+        int next = first;
         int i = 1;
 
         while (true){
             if (i == n){
-                if (next == first) first = first.getLink();
+                if (next == first) first = nextPieces[first];
                 if (next == last) last = prev;
-                prev.setLink(next.getLink());
+                nextPieces[prev] = nextPieces[next];
                 length--;
-                return next.getValue();
+                return set.getPiece(next);
             }
 
             prev = next;
-            next = next.getLink();
+            next = nextPieces[prev];
             i++;
         }
     }
@@ -141,8 +160,8 @@ public class Sequence2 {
             return null;
         }
 
-        Node prev = last;
-        Node next = first;
+        int prev = last;
+        int next = first;
         int i = 1;
         int resultIndex = 0;
         DominoPiece[] result = new DominoPiece[length];
@@ -151,15 +170,15 @@ public class Sequence2 {
 
         while (true){
             if (i == n){
-                prev.setLink(next.getLink());
-                result[resultIndex] = next.getValue();
+                nextPieces[prev] = nextPieces[next];
+                result[resultIndex] = set.getPiece(next);
                 i = 0;
                 resultIndex++;
                 if (resultIndex == result.length) return result;
             }
 
             prev = next;
-            next = next.getLink();
+            next = nextPieces[prev];
             i++;
         }
     }

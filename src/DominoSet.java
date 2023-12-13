@@ -1,3 +1,4 @@
+// класс набора домино , содержит массив фишек и размер
 public class DominoSet {
     private DominoPiece[] domino_array = new DominoPiece[28];
     private int size;  // размер набора
@@ -12,11 +13,13 @@ public class DominoSet {
         }
         size = 28;
     }
-// 28 = 6 * a + 6
+
+    // обращение к элементу массива фишек с индексом i
     public DominoPiece getPiece(int i){
         return domino_array[i];
     }
 
+    // вывод набора
     public void print(){
         System.out.println("Набор костей домино:");
         for(int i = 0; i < size; i++){
@@ -29,7 +32,8 @@ public class DominoSet {
         return size;
     }
 
-    public Sequence toSequence(){
-        return new Sequence(this);
+    // метод для превращения набора в последовательность (набор не меняется, возвращает последовательность)
+    public Sequence_loh toSequence(){
+        return new Sequence_loh(this);
     }
 }
